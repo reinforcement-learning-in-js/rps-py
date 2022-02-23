@@ -53,26 +53,54 @@ def get_average_strategy(strategy_sum):
         avg_strategy = np.zeros(NUM_ACTIONS) + 1 / NUM_ACTIONS
     return avg_strategy
 
+class Player:
+    def __init__(self):
+        self.regret_sum = np.zeros(NUM_ACTIONS)
+        self.strategy_sum = np.zeros(NUM_ACTIONS)
+
 def main():
     def train(num_iter):
-        regret_sum = np.zeros(NUM_ACTIONS)
-        strategy_sum = np.zeros(NUM_ACTIONS)
+        p1 = Player()
+        p2 = Player()
         strategy_history = np.zeros(num_iter)
         for i in range(num_iter):
-            strategy = get_strategy(regret_sum)
-            strategy_sum += strategy
-            action1 = get_action(strategy)
-            action2 = get_action(strategy)
-            regret_sum += accumulate_action_regret(action1, action2)
-            strategy_history[i] = strategy_sum[2]
-        return strategy_sum, strategy_history
+            strategy1 = get_strategy(p1.regret_sum)
+            strategy2 = get_strategy(p2.regret_sum)
+            p1.strategy_sum += strategy1
+            p2.strategy_sum += strategy2
+            action1 = get_action(strategy1)
+            action2 = get_action(strategy2)
+            p1.regret_sum += accumulate_action_regret(action1, action2)
+            p2.regret_sum += accumulate_action_regret(action2, action1)
+            strategy_history[i] = p1.strategy_sum[1]
+        return strategy_history
+
+    def alternating_train(num_iter):
+        p1 = Player()
+        p2 = Player()
+        strategy_history = np.zeros(num_iter)
+        for i in range(num_iter):
+            strategy1 = get_strategy(p1.regret_sum)
+            strategy2 = get_strategy(p2.regret_sum)
+            p1.strategy_sum += strategy1
+            action1 = get_action(strategy1)
+            action2 = get_action(strategy2)
+            p1.regret_sum += accumulate_action_regret(action1, action2)
+            strategy_history[i] = p1.strategy_sum[1]
+            
+            strategy1 = get_strategy(p1.regret_sum)
+            strategy2 = get_strategy(p2.regret_sum)
+            p2.strategy_sum += strategy2
+            action1 = get_action(strategy1)
+            action2 = get_action(strategy2)
+            p2.regret_sum += accumulate_action_regret(action2, action1)
+            strategy_history[i] = p1.strategy_sum[1]
+        return strategy_history
 
     num_iter = 10000
-    strategy_sum, strategy_history = train(num_iter)
-    avg_strategy = get_average_strategy(strategy_sum)
+    strategy_history = alternating_train(num_iter)
     plt.plot(strategy_history/np.arange(1, num_iter+1))
     plt.show()
-    print(avg_strategy)
 
 
 main()
