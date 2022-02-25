@@ -95,10 +95,10 @@ def main():
             action2 = get_action(strategy2)
             p2.regret_sum += accumulate_action_regret(action2, action1)
             strategy_history[i] = p1.strategy_sum[1]
-        return strategy_history
+        return get_average_strategy(p1.strategy_sum), strategy_history
 
     num_iter = 10000
-    strategy_history = alternating_train(num_iter)
+    average_strategy, strategy_history = alternating_train(num_iter)
     plt.plot(strategy_history/np.arange(1, num_iter+1))
     plt.show()
 
