@@ -1,4 +1,3 @@
-from operator import ne
 import numpy as np
 from enum import Enum
 
@@ -37,7 +36,8 @@ class Node:
         return avg_strategy
 
     def __str__(self):
-        return "{}:{0:.3f}".format(self.infostate, self.get_average_strategy())
+        arraystr = '[' + ','.join(map(lambda x: "{0:.3f}".format(x), self.get_average_strategy())) + ']'
+        return "{}:{}".format(self.infostate, arraystr)
 
 class Graph:
     def __init__(self):
@@ -96,6 +96,7 @@ class Graph:
             util += self.cfr(cards, "", 1, 1)
 
     def print(self):
+        print("h: pass, bet")
         for node in sorted(self.node_map.values(), key=lambda s: len(str(s))):
             print("{}".format(str(node)))
 
