@@ -121,6 +121,8 @@ class Graph:
         my_action = my_node.get_action()
         opp_action = opp_node.get_action()
 
+        my_strategy = my_node.get_strategy()
+
         node_util = 0
         action_utils = np.zeros(len(Kanzen.get_actions(my_card)))
         for i in range(len(action_utils)):
@@ -130,9 +132,13 @@ class Graph:
             new_wins = self.get_new_wins(wins, my_action, opp_action)
             new_reach = reach * my_node.get_reach(a)
             action_utils[i] = self.cfr(my_next_card, opp_next_card, new_wins, new_reach)
-            node_util += action_utils[i] * new_reach
-        regret = action_utils - node_util
-        my_node.regret_sum += regret * reach
+            node_util += action_utils[i] * my_strategy[i]
+        #print("{}, {}, {}, {}".format(my_card, opp_card, wins, reach))
+        #print("{} vs {} -> {}".format(my_action, opp_action, new_wins))
+        #print("node util: {}".format(node_util))
+        #print("actions utils: {}".format(action_utils))
+        regret = (action_utils - node_util) * reach
+        my_node.regret_sum += regret
         return node_util
 
     def train(self, iters):
@@ -140,6 +146,8 @@ class Graph:
         opp_cards = my_cards.copy()
         for _ in range(iters):
             self.cfr(my_cards, opp_cards, np.zeros(2), 1)
+            #self.print()
+            #print("============")
     
     def print(self):
         for node in sorted(self.node_map.values(), key=lambda s: len(str(s))):
@@ -152,6 +160,9 @@ def main():
     g.print()
 
 main()
+
+#x = Graph.get_new_wins(np.array([0, 0]), 'S', 'S')
+#print(x)
 
 #print(Kanzen.to_infostate(['R', 'R', 'P'], ['S', 'R'], [1, 0]))
 #print(Kanzen.get_reward([2, 2]))
