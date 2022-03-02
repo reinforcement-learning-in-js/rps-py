@@ -5,6 +5,7 @@ class Node:
         self.my_cards = my_cards
         self.opp_cards = opp_cards
         self.wins = wins
+        self.util = None
         num_actions = len(Kanzen.get_actions(my_cards))
 
         self.regret_sum = np.zeros(num_actions)
@@ -39,7 +40,8 @@ class Node:
 
     def __str__(self):
         return Kanzen.to_infostate(self.my_cards, self.opp_cards, self.wins) + ':' + \
-            ','.join(map(lambda x: str(x), self.get_average_strategy()))
+            ','.join(map(lambda x: "{:.3f}".format(x), self.get_average_strategy())) + \
+            " - {}".format(self.util)
 
 class Kanzen:
     rps_map = {'R':0, 'P':1, 'S':2}
@@ -137,12 +139,13 @@ class Graph:
         #print("{} vs {} -> {}".format(my_action, opp_action, new_wins))
         #print("node util: {}".format(node_util))
         #print("actions utils: {}".format(action_utils))
+        my_node.util = node_util
         regret = (action_utils - node_util) * reach
         my_node.regret_sum += regret
         return node_util
 
     def train(self, iters):
-        my_cards = np.array(['R', 'P', 'S'])
+        my_cards = np.array(['R', 'R', 'P', 'P', 'S', 'S'])
         opp_cards = my_cards.copy()
         for _ in range(iters):
             self.cfr(my_cards, opp_cards, np.zeros(2), 1)
@@ -156,7 +159,7 @@ class Graph:
 
 def main():
     g = Graph()
-    g.train(10000)
+    g.train(8000)
     g.print()
 
 main()
